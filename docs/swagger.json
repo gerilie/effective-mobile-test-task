@@ -1,0 +1,322 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a service for subscriptions",
+        "title": "Subscription API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "paths": {
+        "/subscriptions": {
+            "post": {
+                "description": "ID will be generated.\nPrice must be \u003e 0.\nUser_id must be uuid.\nDate format: 01-2006. End_date is optional.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "Create subscription",
+                "operationId": "create-subscription",
+                "parameters": [
+                    {
+                        "description": "Subscription",
+                        "name": "sub",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created subscription",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/sum": {
+            "get": {
+                "description": "Get total_price of all subscriptions.\nFilter by service_name AND/OR user_id.\nFilter by start_date AND end_date. Date format: 01-2006.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "Get subscription sum",
+                "operationId": "get-subscription-sum",
+                "parameters": [
+                    {
+                        "description": "Subscription sum",
+                        "name": "subSum",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubSumReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription sum",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubSumResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscriptions/{id}": {
+            "get": {
+                "description": "Get by subscription ID.\nIf subscription is not found, returns 404.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "Get subscription",
+                "operationId": "get-subscription",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subscription",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update by subscription ID.\nIf subscription is not found, returns 404.\nPrice must be \u003e 0.\nUser_id must be uuid.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "Update subscription",
+                "operationId": "update-subscription",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Subscription",
+                        "name": "sub",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated subscription",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete by subscription ID.\nIf subscription is not found, returns 404.",
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "Delete subscription",
+                "operationId": "delete-subscription",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "no content"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "subscription.SubReq": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "subscription.SubResp": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "subscription.SubSumReq": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "subscription.SubSumResp": {
+            "type": "object",
+            "properties": {
+                "total_price": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,228 @@
+basePath: /
+definitions:
+  subscription.SubReq:
+    properties:
+      end_date:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  subscription.SubResp:
+    properties:
+      end_date:
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  subscription.SubSumReq:
+    properties:
+      end_date:
+        type: string
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  subscription.SubSumResp:
+    properties:
+      total_price:
+        type: integer
+    type: object
+info:
+  contact: {}
+  description: This is a service for subscriptions
+  title: Subscription API
+  version: "1.0"
+paths:
+  /subscriptions:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        ID will be generated.
+        Price must be > 0.
+        User_id must be uuid.
+        Date format: 01-2006. End_date is optional.
+      operationId: create-subscription
+      parameters:
+      - description: Subscription
+        in: body
+        name: sub
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.SubReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created subscription
+          schema:
+            $ref: '#/definitions/subscription.SubResp'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create subscription
+      tags:
+      - subscription
+  /subscriptions/{id}:
+    delete:
+      description: |-
+        Delete by subscription ID.
+        If subscription is not found, returns 404.
+      operationId: delete-subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: no content
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Delete subscription
+      tags:
+      - subscription
+    get:
+      description: |-
+        Get by subscription ID.
+        If subscription is not found, returns 404.
+      operationId: get-subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription
+          schema:
+            $ref: '#/definitions/subscription.SubResp'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get subscription
+      tags:
+      - subscription
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Update by subscription ID.
+        If subscription is not found, returns 404.
+        Price must be > 0.
+        User_id must be uuid.
+      operationId: update-subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Subscription
+        in: body
+        name: sub
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.SubReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated subscription
+          schema:
+            $ref: '#/definitions/subscription.SubResp'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Update subscription
+      tags:
+      - subscription
+  /subscriptions/sum:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Get total_price of all subscriptions.
+        Filter by service_name AND/OR user_id.
+        Filter by start_date AND end_date. Date format: 01-2006.
+      operationId: get-subscription-sum
+      parameters:
+      - description: Subscription sum
+        in: body
+        name: subSum
+        required: true
+        schema:
+          $ref: '#/definitions/subscription.SubSumReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Subscription sum
+          schema:
+            $ref: '#/definitions/subscription.SubSumResp'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get subscription sum
+      tags:
+      - subscription
+swagger: "2.0"
