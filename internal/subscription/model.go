@@ -5,6 +5,16 @@ import (
 	"time"
 )
 
+var (
+	errInvalidUserID = errors.New("invalid user id")
+
+	errEmptyServiceName = errors.New("empty service name")
+	errEmptyUserID      = errors.New("empty user id")
+	errEmptyPrice       = errors.New("empty price")
+	errEmptyStartDate   = errors.New("empty start date")
+	errEmptyEndDate     = errors.New("empty end date")
+)
+
 type Config struct {
 	Host     string
 	Port     string
@@ -32,24 +42,21 @@ type SubResp struct {
 	EndDate     *string `json:"end_date,omitempty"`
 }
 
+type ListSubReq struct {
+	page   int
+	limit  int
+	offset int
+}
+
+type ListSubResp []SubResp
+
 type SubSumReq struct {
-	ServiceName *string `json:"service_name,omitempty"`
-	UserID      *string `json:"user_id,omitempty"`
-	StartDate   string  `json:"start_date,omitempty"`
-	EndDate     string  `json:"end_date,omitempty"`
+	serviceName string
+	userID      string
+	startDate   string
+	endDate     string
 }
 
 type SubSumResp struct {
 	TotalPrice int `json:"total_price"`
 }
-
-var (
-	errInvalidUserID = errors.New("invalid user id")
-
-	errEmptyServiceName = errors.New("empty service name")
-	errEmptyUserID      = errors.New("empty user id")
-	errEmptyServiceUser = errors.New("empty service name and user id. At least one must be used")
-	errEmptyPrice       = errors.New("empty price")
-	errEmptyStartDate   = errors.New("empty start date")
-	errEmptyEndDate     = errors.New("empty end date")
-)

@@ -3,11 +3,9 @@ package subscription
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"net/http"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/yushafro/effective-mobile-tz/pkg/httputil"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 	"github.com/yushafro/effective-mobile-tz/pkg/postgres"
@@ -16,7 +14,6 @@ import (
 
 // @Summary		Get subscription
 // @Description	Get by subscription ID.
-// @Description	If subscription is not found, returns 404.
 // @Tags			subscription
 // @ID				get-subscription
 // @Produce		json
@@ -33,29 +30,13 @@ func (s *server) get(w http.ResponseWriter, r *http.Request) {
 
 	sub, err := s.service.get(ctx, id)
 	if err != nil {
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			return
-		}
-
-		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "subscription is not found", http.StatusNotFound)
-
-			return
-		}
-
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httputil.HandleErrors(ctx, w, err)
 
 		return
 	}
 
 	if err := httputil.WriteJSON(ctx, w, http.StatusOK, sub); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	log.Info(ctx, "subscription found and sent", zap.String("id", id))

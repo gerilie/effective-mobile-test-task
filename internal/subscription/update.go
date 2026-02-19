@@ -2,12 +2,9 @@ package subscription
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/yushafro/effective-mobile-tz/pkg/httputil"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 	"github.com/yushafro/effective-mobile-tz/pkg/postgres"
@@ -16,16 +13,13 @@ import (
 
 // @Summary		Update subscription
 // @Description	Update by subscription ID.
-// @Description	If subscription is not found, returns 404.
-// @Description	Price must be > 0.
-// @Description	User_id must be uuid.
 // @Tags			subscription
 // @ID				update-subscription
 // @Accept			json
 // @Produce		json
 // @Param			id	path		string	true	"Subscription ID"
 // @Param			sub	body		SubReq	true	"Subscription"
-// @Success		200	{object}	SubResp	"Updated subscription"
+// @Success		200	{object}	SubResp	"Price must be \u003e 0.\nUser_id must be uuid."
 // @Failure		400	{string}	string	"Bad request"
 // @Failure		404	{string}	string	"Not found"
 // @Failure		500	{string}	string	"Internal server error"
@@ -36,9 +30,7 @@ func (s *server) update(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	var sub SubReq
-	if err := httputil.DecodeJSON(ctx, r, &sub); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-
+	if err := httputil.DecodeJSON(ctx, w, r, &sub); err != nil {
 		return
 	}
 
@@ -50,30 +42,12 @@ func (s *server) update(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.service.update(ctx, id, sub)
 	if err != nil {
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			return
-		}
-
-		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "subscription is not found", http.StatusNotFound)
-
-			return
-		}
-
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httputil.HandleErrors(ctx, w, err)
 
 		return
 	}
 
 	if err := httputil.WriteJSON(ctx, w, http.StatusOK, resp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 		return
 	}
 

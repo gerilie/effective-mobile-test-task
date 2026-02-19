@@ -6,3 +6,12 @@
 1. `go mod download`
 2. `make` to build and run service **OR** `make local` to run without building
 3. visit [api](http://localhost:3000/swagger/index.html) 
+
+## environments
+### logger
+- level
+   - debug *(dev default)*
+   - info
+   - warn *(prod default)*
+   - error
+   - fatal

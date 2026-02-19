@@ -34,7 +34,7 @@ func initServer(ctx context.Context, s *server) {
 	repo := subscription.NewPGRepository(db)
 	service := subscription.NewService(repo)
 	server := subscription.NewServer(service, s.cfg.Subscription)
-	server.RegisterHandlers()
+	server.RegisterHandlers(s.cfg.Logger)
 
 	go func() {
 		<-s.shSrvCh

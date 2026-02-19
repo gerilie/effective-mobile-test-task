@@ -24,15 +24,19 @@ const (
 //	@BasePath	/
 
 func main() {
-	log := logger.New()
-	ctx, stop := context.WithTimeout(logger.WithLogger(context.Background(), log), shTO)
-	defer deferfunc.Close(ctx, log.Stop, "Error stopping logger")
+	bootstrapLog := logger.NewBootstrap()
+	ctx, stop := context.WithTimeout(logger.WithLogger(context.Background(), bootstrapLog), shTO)
+	defer deferfunc.Close(ctx, bootstrapLog.Stop, "Error stopping logger")
 	defer stop()
 
 	cfg, err := initConfig(ctx)
 	if err != nil {
 		panic(err)
 	}
+
+	mainLog := logger.NewWithConfig(cfg.Logger)
+	ctx = logger.WithLogger(ctx, mainLog)
+	defer deferfunc.Close(ctx, mainLog.Stop, "Error stopping logger")
 
 	wg := &sync.WaitGroup{}
 	shSrvCh := make(chan struct{})
@@ -54,9 +58,9 @@ func main() {
 	shCh := make(chan os.Signal, 1)
 	signal.Notify(shCh, os.Interrupt, syscall.SIGINT)
 	<-shCh
-	log.Info(ctx, "shutdown signal received")
+	mainLog.Info(ctx, "shutdown signal received")
 
 	close(shSrvCh)
 	wg.Wait()
-	log.Info(ctx, "all servers stopped")
+	mainLog.Info(ctx, "all servers stopped")
 }

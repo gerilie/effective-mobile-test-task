@@ -2,12 +2,10 @@ package subscription
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"net/http"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/yushafro/effective-mobile-tz/pkg/httputil"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 	"github.com/yushafro/effective-mobile-tz/pkg/postgres"
 	"go.uber.org/zap"
@@ -15,7 +13,6 @@ import (
 
 // @Summary		Delete subscription
 // @Description	Delete by subscription ID.
-// @Description	If subscription is not found, returns 404.
 // @Tags			subscription
 // @ID				delete-subscription
 // @Param			id	path	string	true	"Subscription ID"
@@ -31,23 +28,7 @@ func (s *server) delete(w http.ResponseWriter, r *http.Request) {
 
 	err := s.service.delete(ctx, id)
 	if err != nil {
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			return
-		}
-
-		if errors.Is(err, sql.ErrNoRows) {
-			http.Error(w, "subscription is not found", http.StatusNotFound)
-
-			return
-		}
-
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httputil.HandleErrors(ctx, w, err)
 
 		return
 	}

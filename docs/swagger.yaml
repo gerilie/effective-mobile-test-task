@@ -28,17 +28,6 @@ definitions:
       user_id:
         type: string
     type: object
-  subscription.SubSumReq:
-    properties:
-      end_date:
-        type: string
-      service_name:
-        type: string
-      start_date:
-        type: string
-      user_id:
-        type: string
-    type: object
   subscription.SubSumResp:
     properties:
       total_price:
@@ -51,17 +40,48 @@ info:
   version: "1.0"
 paths:
   /subscriptions:
+    get:
+      description: Get paginated list of subscriptions with optional filters
+      operationId: list-subscription
+      parameters:
+      - description: Page number (1-based)
+        in: query
+        name: page
+        type: integer
+      - description: Items per page (default:20, max:100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List subscriptions
+          schema:
+            items:
+              $ref: '#/definitions/subscription.SubResp'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: List subscriptions
+      tags:
+      - subscription
     post:
       consumes:
       - application/json
-      description: |-
-        ID will be generated.
-        Price must be > 0.
-        User_id must be uuid.
-        Date format: 01-2006. End_date is optional.
       operationId: create-subscription
       parameters:
-      - description: Subscription
+      - description: |-
+          ID will be generated.
+          Price must be \u003e 0.
+          User_id must be uuid.
+          Date format: MM-YYYY. End_date is optional.
         in: body
         name: sub
         required: true
@@ -87,9 +107,7 @@ paths:
       - subscription
   /subscriptions/{id}:
     delete:
-      description: |-
-        Delete by subscription ID.
-        If subscription is not found, returns 404.
+      description: Delete by subscription ID.
       operationId: delete-subscription
       parameters:
       - description: Subscription ID
@@ -116,9 +134,7 @@ paths:
       tags:
       - subscription
     get:
-      description: |-
-        Get by subscription ID.
-        If subscription is not found, returns 404.
+      description: Get by subscription ID.
       operationId: get-subscription
       parameters:
       - description: Subscription ID
@@ -151,11 +167,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: |-
-        Update by subscription ID.
-        If subscription is not found, returns 404.
-        Price must be > 0.
-        User_id must be uuid.
+      description: Update by subscription ID.
       operationId: update-subscription
       parameters:
       - description: Subscription ID
@@ -173,7 +185,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Updated subscription
+          description: Price must be \u003e 0.\nUser_id must be uuid.
           schema:
             $ref: '#/definitions/subscription.SubResp'
         "400":
@@ -193,20 +205,27 @@ paths:
       - subscription
   /subscriptions/sum:
     get:
-      consumes:
-      - application/json
-      description: |-
-        Get total_price of all subscriptions.
-        Filter by service_name AND/OR user_id.
-        Filter by start_date AND end_date. Date format: 01-2006.
+      description: Get total_price of all subscriptions.
       operationId: get-subscription-sum
       parameters:
-      - description: Subscription sum
-        in: body
-        name: subSum
+      - description: 'Date format: MM-YYYY'
+        in: query
+        name: start_date
         required: true
-        schema:
-          $ref: '#/definitions/subscription.SubSumReq'
+        type: string
+      - description: 'Date format: MM-YYYY'
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - description: filter by service name
+        in: query
+        name: service_name
+        type: string
+      - description: filter by user ID
+        in: query
+        name: user_id
+        type: string
       produces:
       - application/json
       responses:
@@ -222,7 +241,7 @@ paths:
           description: Internal server error
           schema:
             type: string
-      summary: Get subscription sum
+      summary: Get subscription summa
       tags:
       - subscription
 swagger: "2.0"

@@ -16,8 +16,55 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/subscriptions": {
+            "get": {
+                "description": "Get paginated list of subscriptions with optional filters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "List subscriptions",
+                "operationId": "list-subscription",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (1-based)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default:20, max:100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List subscriptions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/subscription.SubResp"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "ID will be generated.\nPrice must be \u003e 0.\nUser_id must be uuid.\nDate format: 01-2006. End_date is optional.",
                 "consumes": [
                     "application/json"
                 ],
@@ -31,7 +78,7 @@ const docTemplate = `{
                 "operationId": "create-subscription",
                 "parameters": [
                     {
-                        "description": "Subscription",
+                        "description": "ID will be generated.\nPrice must be \\u003e 0.\nUser_id must be uuid.\nDate format: MM-YYYY. End_date is optional.",
                         "name": "sub",
                         "in": "body",
                         "required": true,
@@ -64,27 +111,41 @@ const docTemplate = `{
         },
         "/subscriptions/sum": {
             "get": {
-                "description": "Get total_price of all subscriptions.\nFilter by service_name AND/OR user_id.\nFilter by start_date AND end_date. Date format: 01-2006.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Get total_price of all subscriptions.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "subscription"
                 ],
-                "summary": "Get subscription sum",
+                "summary": "Get subscription summa",
                 "operationId": "get-subscription-sum",
                 "parameters": [
                     {
-                        "description": "Subscription sum",
-                        "name": "subSum",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/subscription.SubSumReq"
-                        }
+                        "type": "string",
+                        "description": "Date format: MM-YYYY",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Date format: MM-YYYY",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by service name",
+                        "name": "service_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by user ID",
+                        "name": "user_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -111,7 +172,7 @@ const docTemplate = `{
         },
         "/subscriptions/{id}": {
             "get": {
-                "description": "Get by subscription ID.\nIf subscription is not found, returns 404.",
+                "description": "Get by subscription ID.",
                 "produces": [
                     "application/json"
                 ],
@@ -157,7 +218,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update by subscription ID.\nIf subscription is not found, returns 404.\nPrice must be \u003e 0.\nUser_id must be uuid.",
+                "description": "Update by subscription ID.",
                 "consumes": [
                     "application/json"
                 ],
@@ -189,7 +250,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Updated subscription",
+                        "description": "Price must be \\u003e 0.\\nUser_id must be uuid.",
                         "schema": {
                             "$ref": "#/definitions/subscription.SubResp"
                         }
@@ -215,7 +276,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete by subscription ID.\nIf subscription is not found, returns 404.",
+                "description": "Delete by subscription ID.",
                 "tags": [
                     "subscription"
                 ],
@@ -300,23 +361,6 @@ const docTemplate = `{
                 }
             }
         },
-        "subscription.SubSumReq": {
-            "type": "object",
-            "properties": {
-                "end_date": {
-                    "type": "string"
-                },
-                "service_name": {
-                    "type": "string"
-                },
-                "start_date": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "subscription.SubSumResp": {
             "type": "object",
             "properties": {
@@ -328,7 +372,7 @@ const docTemplate = `{
     }
 }`
 
-// SwaggerInfo holds exported Swagger Info so clients can modify it.
+// SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",

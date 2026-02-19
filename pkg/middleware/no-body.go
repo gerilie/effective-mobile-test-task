@@ -6,14 +6,14 @@ import (
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
 
-func CancelingEmptyBody(next http.Handler) http.Handler {
+func NoBody(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		log := logger.FromContext(ctx)
 
-		if r.ContentLength == 0 {
-			log.Error(ctx, "Empty request body error")
-			http.Error(w, "request body is empty", http.StatusBadRequest)
+		if r.ContentLength != 0 {
+			log.Error(ctx, "request body must be empty")
+			http.Error(w, "request body must be empty", http.StatusBadRequest)
 
 			return
 		}

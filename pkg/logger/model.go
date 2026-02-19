@@ -13,10 +13,15 @@ const (
 	RequestID key = "request_id"
 )
 
+type Config struct {
+	Level string `mapstructure:"level"`
+}
+
 type Logger interface {
-	Info(ctx context.Context, msg string, fields ...zap.Field)
-	Error(ctx context.Context, msg string, fields ...zap.Field)
 	Debug(ctx context.Context, msg string, fields ...zap.Field)
+	Info(ctx context.Context, msg string, fields ...zap.Field)
+	Warn(ctx context.Context, msg string, fields ...zap.Field)
+	Error(ctx context.Context, msg string, fields ...zap.Field)
 	Fatal(ctx context.Context, msg string, fields ...zap.Field)
 	Stop() error
 }
@@ -25,8 +30,37 @@ type logger struct {
 	l *zap.Logger
 }
 
-func New() *logger {
-	log, err := zap.NewProduction()
+func NewBootstrap() Logger {
+	cfg := zap.NewProductionConfig()
+	cfg.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
+	l, _ := cfg.Build()
+
+	return &logger{
+		l: l,
+	}
+}
+
+func NewWithConfig(cfg Config) Logger {
+	_cfg := zap.NewProductionConfig()
+
+	atomicLevel := zap.NewAtomicLevel()
+	switch cfg.Level {
+	case "debug":
+		atomicLevel.SetLevel(zap.DebugLevel)
+	case "info":
+		atomicLevel.SetLevel(zap.InfoLevel)
+	case "warn":
+		atomicLevel.SetLevel(zap.WarnLevel)
+	case "error":
+		atomicLevel.SetLevel(zap.ErrorLevel)
+	case "fatal":
+		atomicLevel.SetLevel(zap.FatalLevel)
+	default:
+		atomicLevel.SetLevel(zap.InfoLevel)
+	}
+	_cfg.Level = atomicLevel
+
+	l, err := _cfg.Build()
 	if err != nil {
 		return &logger{
 			l: zap.L(),
@@ -34,52 +68,10 @@ func New() *logger {
 	}
 
 	return &logger{
-		l: log,
+		l: l,
 	}
 }
 
 func (l *logger) Stop() error {
 	return l.l.Sync()
-}
-
-func (l *logger) Info(ctx context.Context, msg string, fields ...zap.Field) {
-	fields = addID(ctx, fields)
-	l.l.Info(msg, fields...)
-}
-
-func (l *logger) Error(ctx context.Context, msg string, fields ...zap.Field) {
-	fields = addID(ctx, fields)
-	l.l.Error(msg, fields...)
-}
-
-func (l *logger) Debug(ctx context.Context, msg string, fields ...zap.Field) {
-	fields = addID(ctx, fields)
-	l.l.Debug(msg, fields...)
-}
-
-func (l *logger) Fatal(ctx context.Context, msg string, fields ...zap.Field) {
-	fields = addID(ctx, fields)
-	l.l.Fatal(msg, fields...)
-}
-
-func WithLogger(ctx context.Context, logger *logger) context.Context {
-	return context.WithValue(ctx, loggerKey, logger)
-}
-
-func FromContext(ctx context.Context) *logger {
-	l, ok := ctx.Value(loggerKey).(logger)
-	if !ok {
-		return New()
-	}
-
-	return &l
-}
-
-func addID(ctx context.Context, fields []zap.Field) []zap.Field {
-	id, ok := ctx.Value(RequestID).(string)
-	if ok {
-		fields = append(fields, zap.String("request_id", id))
-	}
-
-	return fields
 }

@@ -2,39 +2,31 @@ package subscription
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/yushafro/effective-mobile-tz/pkg/httputil"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 	"github.com/yushafro/effective-mobile-tz/pkg/postgres"
 	"go.uber.org/zap"
 )
 
-// @Summary		Create subscription
-// @Description	ID will be generated.
-// @Description	Price must be > 0.
-// @Description	User_id must be uuid.
-// @Description	Date format: 01-2006. End_date is optional.
-// @Tags			subscription
-// @ID				create-subscription
-// @Accept			json
-// @Produce		json
-// @Param			sub	body		SubReq	true	"Subscription"
-// @Success		201	{object}	SubResp	"Created subscription"
-// @Failure		400	{string}	string	"Bad request"
-// @Failure		500	{string}	string	"Internal server error"
-// @Router			/subscriptions [post].
+// @Summary	Create subscription
+// @Tags		subscription
+// @ID			create-subscription
+// @Accept		json
+// @Produce	json
+// @Param		sub	body		SubReq	true	"ID will be generated.\nPrice must be \u003e 0.\nUser_id must be uuid.\nDate format: MM-YYYY. End_date is optional."
+// @Success	201	{object}	SubResp	"Created subscription"
+// @Failure	400	{string}	string	"Bad request"
+// @Failure	500	{string}	string	"Internal server error"
+// @Router		/subscriptions [post].
 func (s *server) create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)
 
 	var sub SubReq
-	if err := httputil.DecodeJSON(ctx, r, &sub); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-
+	if err := httputil.DecodeJSON(ctx, w, r, &sub); err != nil {
 		return
 	}
 
@@ -46,25 +38,13 @@ func (s *server) create(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := s.service.create(ctx, sub)
 	if err != nil {
-		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			return
-		}
-
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			http.Error(w, pgErr.Message, http.StatusBadRequest)
-
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httputil.HandleErrors(ctx, w, err)
 
 		return
 	}
 
 	w.Header().Set("Location", fmt.Sprint("/subscriptions/", resp.ID))
 	if err := httputil.WriteJSON(ctx, w, http.StatusCreated, resp); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 		return
 	}
 

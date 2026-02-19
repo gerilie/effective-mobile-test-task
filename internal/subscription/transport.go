@@ -20,16 +20,17 @@ const (
 	createPattern  = "POST /subscriptions"
 	updatePattern  = "PUT /subscriptions/{id}"
 	deletePattern  = "DELETE /subscriptions/{id}"
+	listPattern    = "GET /subscriptions"
 	sumPattern     = "GET /subscriptions/sum"
 	swaggerPattern = "/swagger/"
 )
 
 type server struct {
-	service repository
+	service Service
 	server  *http.Server
 }
 
-func NewServer(service *service, cfg Config) *server {
+func NewServer(service Service, cfg Config) *server {
 	return &server{
 		service: service,
 		server: &http.Server{
@@ -51,28 +52,34 @@ func (s *server) Stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
-func (s *server) RegisterHandlers() {
+func (s *server) RegisterHandlers(logCfg logger.Config) {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc(swaggerPattern, httpSwagger.Handler())
-	mux.HandleFunc(getPattern, s.get)
-	mux.HandleFunc(deletePattern, s.delete)
-
+	mux.Handle(
+		getPattern,
+		middleware.NoBody(http.HandlerFunc(s.get)),
+	)
 	mux.Handle(
 		createPattern,
-		middleware.CancelingEmptyBody(http.HandlerFunc(s.create)),
+		middleware.RequireBody(http.HandlerFunc(s.create)),
 	)
 	mux.Handle(
 		updatePattern,
-		middleware.CancelingEmptyBody(http.HandlerFunc(s.update)),
+		middleware.RequireBody(http.HandlerFunc(s.update)),
+	)
+	mux.HandleFunc(deletePattern, s.delete)
+	mux.Handle(
+		listPattern,
+		middleware.NoBody(http.HandlerFunc(s.list)),
 	)
 
 	mux.Handle(
 		sumPattern,
-		middleware.CancelingEmptyBody(http.HandlerFunc(s.sum)),
+		middleware.NoBody(http.HandlerFunc(s.sum)),
 	)
 
-	s.server.Handler = middleware.Logging(mux)
+	s.server.Handler = middleware.Logging(mux, logCfg)
 }
 
 func (s *server) validateSub(ctx context.Context, sub *SubReq) error {
@@ -98,45 +105,42 @@ func (s *server) validateSub(ctx context.Context, sub *SubReq) error {
 		return fmt.Errorf("%w: %w", errInvalidUserID, err)
 	}
 
-	err = date.FormatM_Y(ctx, &sub.StartDate)
+	sub.StartDate, err = date.FormatDateToPGDate(ctx, sub.StartDate)
 	if err != nil {
 		return err
 	}
-	err = date.FormatM_Y(ctx, sub.EndDate)
-	if err != nil {
-		return err
+
+	if sub.EndDate != nil {
+		*sub.EndDate, err = date.FormatDateToPGDate(ctx, *sub.EndDate)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func (s *server) validateSubSum(ctx context.Context, subSum *SubSumReq) error {
-	log := logger.FromContext(ctx)
-
-	if subSum.ServiceName == nil && subSum.UserID == nil {
-		return errEmptyServiceUser
-	}
-	if subSum.StartDate == "" {
+	if subSum.startDate == "" {
 		return errEmptyStartDate
 	}
-	if subSum.EndDate == "" {
+	if subSum.endDate == "" {
 		return errEmptyEndDate
 	}
 
-	if subSum.UserID != nil {
-		err := uuid.Validate(*subSum.UserID)
+	var err error
+	if subSum.userID != "" {
+		err = uuid.Validate(subSum.userID)
 		if err != nil {
-			log.Error(ctx, errInvalidUserID.Error(), zap.Error(err))
-
 			return fmt.Errorf("%w: %w", errInvalidUserID, err)
 		}
 	}
 
-	err := date.FormatM_Y(ctx, &subSum.StartDate)
+	subSum.startDate, err = date.FormatDateToPGDate(ctx, subSum.startDate)
 	if err != nil {
 		return err
 	}
-	err = date.FormatM_Y(ctx, &subSum.EndDate)
+	subSum.endDate, err = date.FormatDateToPGDate(ctx, subSum.endDate)
 	if err != nil {
 		return err
 	}
