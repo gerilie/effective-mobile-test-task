@@ -1,5 +1,10 @@
 basePath: /
 definitions:
+  ping.pingResp:
+    properties:
+      timestamp:
+        type: string
+    type: object
   subscription.SubReq:
     properties:
       end_date:
@@ -12,6 +17,11 @@ definitions:
         type: string
       user_id:
         type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    - user_id
     type: object
   subscription.SubResp:
     properties:
@@ -33,25 +43,76 @@ definitions:
       total_price:
         type: integer
     type: object
+  subscription.UpdateSubReq:
+    properties:
+      end_date:
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  validation.Errors:
+    additionalProperties:
+      type: string
+    type: object
+  validation.Resp:
+    properties:
+      fields:
+        $ref: '#/definitions/validation.Errors'
+    type: object
 info:
   contact: {}
-  description: This is a service for subscriptions
+  description: Subscription service
   title: Subscription API
   version: "1.0"
 paths:
+  /ping:
+    get:
+      operationId: ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ping success
+          schema:
+            $ref: '#/definitions/ping.pingResp'
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Ping service
+      tags:
+      - health
   /subscriptions:
     get:
       description: Get paginated list of subscriptions with optional filters
-      operationId: list-subscription
+      operationId: subscription-list
       parameters:
       - description: Page number (1-based)
         in: query
         name: page
+        required: true
         type: integer
-      - description: Items per page (default:20, max:100)
+      - description: 'Items per page (max: 100)'
         in: query
         name: limit
+        required: true
         type: integer
+      - description: filter by service name
+        in: query
+        name: service_name
+        type: string
+      - description: filter by user ID
+        in: query
+        name: user_id
+        type: string
       produces:
       - application/json
       responses:
@@ -78,10 +139,8 @@ paths:
       operationId: create-subscription
       parameters:
       - description: |-
-          ID will be generated.
-          Price must be \u003e 0.
-          User_id must be uuid.
-          Date format: MM-YYYY. End_date is optional.
+          User ID must be uuid
+          Date format: MM-YYYY
         in: body
         name: sub
         required: true
@@ -96,6 +155,10 @@ paths:
             $ref: '#/definitions/subscription.SubResp'
         "400":
           description: Bad request
+          schema:
+            $ref: '#/definitions/validation.Resp'
+        "404":
+          description: Not found
           schema:
             type: string
         "500":
@@ -164,7 +227,7 @@ paths:
       summary: Get subscription
       tags:
       - subscription
-    put:
+    patch:
       consumes:
       - application/json
       description: Update by subscription ID.
@@ -180,18 +243,18 @@ paths:
         name: sub
         required: true
         schema:
-          $ref: '#/definitions/subscription.SubReq'
+          $ref: '#/definitions/subscription.UpdateSubReq'
       produces:
       - application/json
       responses:
         "200":
-          description: Price must be \u003e 0.\nUser_id must be uuid.
+          description: User ID must be uuid
           schema:
             $ref: '#/definitions/subscription.SubResp'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/validation.Resp'
         "404":
           description: Not found
           schema:
@@ -236,7 +299,7 @@ paths:
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/validation.Resp'
         "500":
           description: Internal server error
           schema:

@@ -2,46 +2,74 @@ package subscription
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
+	"time"
 
-	"github.com/google/uuid"
+	"github.com/go-playground/validator/v10"
 	httpSwagger "github.com/swaggo/http-swagger"
 	_ "github.com/yushafro/effective-mobile-tz/docs"
-	"github.com/yushafro/effective-mobile-tz/pkg/date"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 	"github.com/yushafro/effective-mobile-tz/pkg/middleware"
-	"go.uber.org/zap"
+	"github.com/yushafro/effective-mobile-tz/pkg/ping"
+	"github.com/yushafro/effective-mobile-tz/pkg/ratelimiter"
+	"golang.org/x/time/rate"
 )
 
 const (
 	getPattern     = "GET /subscriptions/{id}"
 	createPattern  = "POST /subscriptions"
-	updatePattern  = "PUT /subscriptions/{id}"
+	updatePattern  = "PATCH /subscriptions/{id}"
 	deletePattern  = "DELETE /subscriptions/{id}"
 	listPattern    = "GET /subscriptions"
 	sumPattern     = "GET /subscriptions/sum"
 	swaggerPattern = "/swagger/"
+	pingPattern    = "GET /ping"
 )
 
-type server struct {
-	service Service
-	server  *http.Server
+type Config struct {
+	Host                string
+	Port                string
+	ReadHTO             time.Duration `mapstructure:"read_header_timeout"`
+	ReadTO              time.Duration `mapstructure:"read_timeout"`
+	WriteTO             time.Duration `mapstructure:"write_timeout"`
+	IdleTO              time.Duration `mapstructure:"idle_timeout"`
+	RLRequestsPerSecond int           `mapstructure:"rate_limit_requests_per_second"`
+	RLBurst             int           `mapstructure:"rate_limit_burst"`
 }
 
-func NewServer(service Service, cfg Config) *server {
-	return &server{
-		service: service,
-		server: &http.Server{
-			Addr:              net.JoinHostPort(cfg.Host, cfg.Port),
-			ReadTimeout:       cfg.ReadTO,
-			WriteTimeout:      cfg.WriteTO,
-			IdleTimeout:       cfg.IdleTO,
-			ReadHeaderTimeout: cfg.ReadHTO,
-			Handler:           nil,
-		},
+type server struct {
+	service  Service
+	server   *http.Server
+	validate *validator.Validate
+	limiter  ratelimiter.IPRateLimiter
+	logger   logger.Logger
+}
+
+func NewServer(service Service, cfg Config, log logger.Logger) *server {
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	limiter := ratelimiter.NewIPRateLimiter(
+		rate.Limit(cfg.RLRequestsPerSecond),
+		cfg.RLBurst,
+	)
+
+	s := &server{
+		service:  service,
+		validate: validate,
+		limiter:  limiter,
+		logger:   log,
 	}
+
+	s.server = &http.Server{
+		Addr:              net.JoinHostPort(cfg.Host, cfg.Port),
+		ReadTimeout:       cfg.ReadTO,
+		WriteTimeout:      cfg.WriteTO,
+		IdleTimeout:       cfg.IdleTO,
+		ReadHeaderTimeout: cfg.ReadHTO,
+		Handler:           s.buildHandler(),
+	}
+
+	return s
 }
 
 func (s *server) Start() error {
@@ -52,10 +80,18 @@ func (s *server) Stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
-func (s *server) RegisterHandlers(logCfg logger.Config) {
+func (s *server) buildHandler() http.Handler {
+	mux := s.buildRouter()
+
+	return s.buildMiddlewareChain(mux)
+}
+
+func (s *server) buildRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 
+	mux.HandleFunc(pingPattern, ping.Ping)
 	mux.HandleFunc(swaggerPattern, httpSwagger.Handler())
+
 	mux.Handle(
 		getPattern,
 		middleware.NoBody(http.HandlerFunc(s.get)),
@@ -79,71 +115,12 @@ func (s *server) RegisterHandlers(logCfg logger.Config) {
 		middleware.NoBody(http.HandlerFunc(s.sum)),
 	)
 
-	s.server.Handler = middleware.Logging(mux, logCfg)
+	return mux
 }
 
-func (s *server) validateSub(ctx context.Context, sub *SubReq) error {
-	log := logger.FromContext(ctx)
+func (s *server) buildMiddlewareChain(handler http.Handler) http.Handler {
+	handler = middleware.RateLimiter(handler, s.limiter)
+	handler = middleware.Logging(handler, s.logger)
 
-	if sub.ServiceName == "" {
-		return errEmptyServiceName
-	}
-	if sub.Price == 0 {
-		return errEmptyPrice
-	}
-	if sub.UserID == "" {
-		return errEmptyUserID
-	}
-	if sub.StartDate == "" {
-		return errEmptyStartDate
-	}
-
-	err := uuid.Validate(sub.UserID)
-	if err != nil {
-		log.Error(ctx, errInvalidUserID.Error(), zap.Error(err))
-
-		return fmt.Errorf("%w: %w", errInvalidUserID, err)
-	}
-
-	sub.StartDate, err = date.FormatDateToPGDate(ctx, sub.StartDate)
-	if err != nil {
-		return err
-	}
-
-	if sub.EndDate != nil {
-		*sub.EndDate, err = date.FormatDateToPGDate(ctx, *sub.EndDate)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (s *server) validateSubSum(ctx context.Context, subSum *SubSumReq) error {
-	if subSum.startDate == "" {
-		return errEmptyStartDate
-	}
-	if subSum.endDate == "" {
-		return errEmptyEndDate
-	}
-
-	var err error
-	if subSum.userID != "" {
-		err = uuid.Validate(subSum.userID)
-		if err != nil {
-			return fmt.Errorf("%w: %w", errInvalidUserID, err)
-		}
-	}
-
-	subSum.startDate, err = date.FormatDateToPGDate(ctx, subSum.startDate)
-	if err != nil {
-		return err
-	}
-	subSum.endDate, err = date.FormatDateToPGDate(ctx, subSum.endDate)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return handler
 }

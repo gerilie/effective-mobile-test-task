@@ -2,12 +2,11 @@ package subscription
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/yushafro/effective-mobile-tz/pkg/httputil"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
-	"github.com/yushafro/effective-mobile-tz/pkg/postgres"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +27,7 @@ func (s *server) delete(w http.ResponseWriter, r *http.Request) {
 
 	err := s.service.delete(ctx, id)
 	if err != nil {
-		httputil.HandleErrors(ctx, w, err)
+		handleServiceErrors(ctx, w, err)
 
 		return
 	}
@@ -49,16 +48,12 @@ func (r *pgRepository) delete(ctx context.Context, id string) error {
 		Suffix("RETURNING id").
 		ToSql()
 	if err != nil {
-		log.Error(ctx, postgres.ErrBuildingQuery.Error(), zap.Error(err))
-
-		return err
+		return fmt.Errorf("build query: %w", err)
 	}
-	var deletedID string
-	row := r.db.QueryRow(ctx, sql, args...)
-	if err := row.Scan(&deletedID); err != nil {
-		log.Error(ctx, postgres.ErrReadingRow.Error(), zap.Error(err))
 
-		return err
+	row := r.db.QueryRow(ctx, sql, args...)
+	if err := row.Scan(&id); err != nil {
+		return fmt.Errorf("read row: %w", err)
 	}
 
 	log.Info(ctx, "query executed", zap.String("query", sql), zap.Any("args", args))

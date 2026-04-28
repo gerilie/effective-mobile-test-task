@@ -2,15 +2,12 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
-
-var ErrConnect = errors.New("unable to connect to database")
 
 type Config struct {
 	Host     string `mapstructure:"postgres_host"`
@@ -33,12 +30,12 @@ func New(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 
 	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
-		return nil, ErrConnect
+		return nil, fmt.Errorf("connection failed: %w", err)
 	}
 
 	err = pool.Ping(ctx)
 	if err != nil {
-		return nil, ErrConnect
+		return nil, fmt.Errorf("connection failed: %w", err)
 	}
 
 	log.Info(ctx, "connected to database")

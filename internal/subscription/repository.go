@@ -8,12 +8,12 @@ import (
 )
 
 type Repository interface {
-	create(ctx context.Context, sub SubReq) (SubResp, error)
-	get(ctx context.Context, id string) (SubResp, error)
-	update(ctx context.Context, id string, sub SubReq) (SubResp, error)
+	create(ctx context.Context, model sub) (sub, error)
+	get(ctx context.Context, id string) (sub, error)
+	update(ctx context.Context, id string, model updateSub) (sub, error)
 	delete(ctx context.Context, id string) error
-	list(ctx context.Context, list ListSubReq) (ListSubResp, error)
-	sum(ctx context.Context, subSum SubSumReq) (SubSumResp, error)
+	list(ctx context.Context, model subList) ([]sub, error)
+	sum(ctx context.Context, model subSum) (subSum, error)
 }
 
 type pgRepository struct {

@@ -25,7 +25,7 @@ USER appuser
 
 FROM runtime AS subscription
 EXPOSE 8080
-ENTRYPOINT [ "/app/subscription" ]
+ENTRYPOINT ["sh", "-c", "/app/subscription --env=prod"]
 
 # migrate
 FROM golang:alpine AS migrate-builder
@@ -42,4 +42,4 @@ COPY ./migrations /app/migrations
 COPY ./Makefile /app/Makefile
 
 FROM migrate-runtime AS migrate
-ENTRYPOINT ["make", "migrate-up", "env=prod"]
+ENTRYPOINT ["sh", "-c", "goose up"]

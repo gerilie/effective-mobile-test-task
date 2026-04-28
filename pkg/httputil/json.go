@@ -3,45 +3,48 @@ package httputil
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/yushafro/effective-mobile-tz/pkg/deferfunc"
-	"github.com/yushafro/effective-mobile-tz/pkg/logger"
-	"go.uber.org/zap"
 )
 
 func DecodeJSON[T any](ctx context.Context, w http.ResponseWriter, r *http.Request, dst *T) error {
-	log := logger.FromContext(ctx)
-
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, ErrReadingRequestBody.Error(), http.StatusBadRequest)
-		log.Error(ctx, ErrReadingRequestBody.Error(), zap.Error(err))
-
-		return err
+		return fmt.Errorf("read request body: %w", err)
 	}
-	defer deferfunc.Close(ctx, r.Body.Close, ErrClosingRequestBody.Error())
+	defer deferfunc.Close(ctx, r.Body.Close, "close request body")
 
 	if err := json.Unmarshal(body, dst); err != nil {
-		http.Error(w, ErrDecodingRequestBody.Error(), http.StatusBadRequest)
-		log.Error(ctx, ErrDecodingRequestBody.Error(), zap.Error(err))
+		var unmarshalErr *json.UnmarshalTypeError
+		var syntaxErr *json.SyntaxError
+		if errors.As(err, &unmarshalErr) || errors.As(err, &syntaxErr) {
+			http.Error(
+				w,
+				"invalid request body: type mismatch or malformed JSON",
+				http.StatusBadRequest,
+			)
 
-		return err
+			return fmt.Errorf("decode request body: %w", err)
+		}
+
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+
+		return fmt.Errorf("decode request body: %w", err)
 	}
 
 	return nil
 }
 
 func WriteJSON(ctx context.Context, w http.ResponseWriter, status int, v any) error {
-	log := logger.FromContext(ctx)
-
 	data, err := json.Marshal(v)
 	if err != nil {
-		http.Error(w, ErrEncodingResponseBody.Error(), http.StatusInternalServerError)
-		log.Error(ctx, ErrEncodingResponseBody.Error(), zap.Error(err))
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 
-		return err
+		return fmt.Errorf("encode request body: %w", err)
 	}
 
 	w.Header().Set(ContentType, JSON)
@@ -49,10 +52,9 @@ func WriteJSON(ctx context.Context, w http.ResponseWriter, status int, v any) er
 
 	_, err = w.Write(data)
 	if err != nil {
-		http.Error(w, ErrWritingResponseBody.Error(), http.StatusInternalServerError)
-		log.Error(ctx, ErrWritingResponseBody.Error(), zap.Error(err))
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 
-		return err
+		return fmt.Errorf("write response body: %w", err)
 	}
 
 	return nil

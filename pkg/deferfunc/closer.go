@@ -12,8 +12,7 @@ import (
 func Close(ctx context.Context, c func() error, errMsg string) {
 	log := logger.FromContext(ctx)
 
-	err := c()
-	if err != nil && !errors.Is(err, syscall.EINVAL) {
+	if err := c(); err != nil && !errors.Is(err, syscall.EINVAL) {
 		log.Error(ctx, errMsg, zap.Error(err))
 	}
 }

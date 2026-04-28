@@ -15,6 +15,32 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/ping": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Ping service",
+                "operationId": "ping",
+                "responses": {
+                    "200": {
+                        "description": "Ping success",
+                        "schema": {
+                            "$ref": "#/definitions/ping.pingResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/subscriptions": {
             "get": {
                 "description": "Get paginated list of subscriptions with optional filters",
@@ -25,18 +51,32 @@ const docTemplate = `{
                     "subscription"
                 ],
                 "summary": "List subscriptions",
-                "operationId": "list-subscription",
+                "operationId": "subscription-list",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "Page number (1-based)",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "Items per page (default:20, max:100)",
+                        "description": "Items per page (max: 100)",
                         "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by service name",
+                        "name": "service_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by user ID",
+                        "name": "user_id",
                         "in": "query"
                     }
                 ],
@@ -78,7 +118,7 @@ const docTemplate = `{
                 "operationId": "create-subscription",
                 "parameters": [
                     {
-                        "description": "ID will be generated.\nPrice must be \\u003e 0.\nUser_id must be uuid.\nDate format: MM-YYYY. End_date is optional.",
+                        "description": "User ID must be uuid\nDate format: MM-YYYY",
                         "name": "sub",
                         "in": "body",
                         "required": true,
@@ -96,6 +136,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/validation.Resp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
                         "schema": {
                             "type": "string"
                         }
@@ -158,7 +204,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/validation.Resp"
                         }
                     },
                     "500": {
@@ -193,64 +239,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Subscription",
-                        "schema": {
-                            "$ref": "#/definitions/subscription.SubResp"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update by subscription ID.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "subscription"
-                ],
-                "summary": "Update subscription",
-                "operationId": "update-subscription",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Subscription ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Subscription",
-                        "name": "sub",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/subscription.SubReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Price must be \\u003e 0.\\nUser_id must be uuid.",
                         "schema": {
                             "$ref": "#/definitions/subscription.SubResp"
                         }
@@ -314,12 +302,84 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Update by subscription ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "subscription"
+                ],
+                "summary": "Update subscription",
+                "operationId": "update-subscription",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Subscription ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Subscription",
+                        "name": "sub",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/subscription.UpdateSubReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User ID must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/subscription.SubResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/validation.Resp"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
+        "ping.pingResp": {
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
         "subscription.SubReq": {
             "type": "object",
+            "required": [
+                "price",
+                "service_name",
+                "start_date",
+                "user_id"
+            ],
             "properties": {
                 "end_date": {
                     "type": "string"
@@ -368,6 +428,43 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "subscription.UpdateSubReq": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "validation.Errors": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "validation.Resp": {
+            "type": "object",
+            "properties": {
+                "fields": {
+                    "$ref": "#/definitions/validation.Errors"
+                }
+            }
         }
     }
 }`
@@ -379,7 +476,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Subscription API",
-	Description:      "This is a service for subscriptions",
+	Description:      "Subscription service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

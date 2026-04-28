@@ -10,11 +10,9 @@ import (
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
 
-func Logging(next http.Handler, logCfg logger.Config) http.Handler {
+func Logging(next http.Handler, log logger.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		log := logger.NewWithConfig(logCfg)
-		ctx = logger.WithLogger(ctx, log)
+		ctx := logger.WithLogger(r.Context(), log)
 		defer deferfunc.Close(ctx, log.Stop, "error stopping logger")
 
 		id := r.Header.Get(httputil.RequestID)
@@ -23,7 +21,7 @@ func Logging(next http.Handler, logCfg logger.Config) http.Handler {
 			id = uuid.NewString()
 		}
 
-		ctx = context.WithValue(ctx, logger.RequestID, id)
+		ctx = context.WithValue(ctx, logger.RequestIDKey, id)
 
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)

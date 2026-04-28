@@ -33,8 +33,7 @@ func initServer(ctx context.Context, s *server) {
 
 	repo := subscription.NewPGRepository(db)
 	service := subscription.NewService(repo)
-	server := subscription.NewServer(service, s.cfg.Subscription)
-	server.RegisterHandlers(s.cfg.Logger)
+	server := subscription.NewServer(service, s.cfg.Subscription, log)
 
 	go func() {
 		<-s.shSrvCh
@@ -54,7 +53,7 @@ func initServer(ctx context.Context, s *server) {
 
 	log.Info(ctx, "server started")
 	err = server.Start()
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+	if !errors.Is(err, http.ErrServerClosed) {
 		log.Error(ctx, "Error starting server", zap.Error(err))
 		s.wg.Done()
 		s.errCh <- err

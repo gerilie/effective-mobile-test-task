@@ -3,18 +3,20 @@ package logger
 import (
 	"context"
 
+	"github.com/yushafro/effective-mobile-tz/pkg/env"
 	"go.uber.org/zap"
 )
 
 type key string
 
 const (
-	loggerKey key = "logger"
-	RequestID key = "request_id"
+	loggerKey    key = "logger"
+	RequestIDKey key = "request_id"
 )
 
 type Config struct {
 	Level string `mapstructure:"level"`
+	Env   string
 }
 
 type Logger interface {
@@ -30,10 +32,20 @@ type logger struct {
 	l *zap.Logger
 }
 
-func NewBootstrap() Logger {
-	cfg := zap.NewProductionConfig()
-	cfg.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
-	l, _ := cfg.Build()
+func NewBootstrap(environment string) Logger {
+	var cfg zap.Config
+	if environment == env.Dev || environment == env.Host {
+		cfg = zap.NewDevelopmentConfig()
+	} else {
+		cfg = zap.NewProductionConfig()
+	}
+
+	l, err := cfg.Build()
+	if err != nil {
+		return &logger{
+			l: zap.L(),
+		}
+	}
 
 	return &logger{
 		l: l,
@@ -41,7 +53,12 @@ func NewBootstrap() Logger {
 }
 
 func NewWithConfig(cfg Config) Logger {
-	_cfg := zap.NewProductionConfig()
+	var config zap.Config
+	if cfg.Env == env.Dev || cfg.Env == env.Host {
+		config = zap.NewDevelopmentConfig()
+	} else {
+		config = zap.NewProductionConfig()
+	}
 
 	atomicLevel := zap.NewAtomicLevel()
 	switch cfg.Level {
@@ -58,9 +75,9 @@ func NewWithConfig(cfg Config) Logger {
 	default:
 		atomicLevel.SetLevel(zap.InfoLevel)
 	}
-	_cfg.Level = atomicLevel
+	config.Level = atomicLevel
 
-	l, err := _cfg.Build()
+	l, err := config.Build()
 	if err != nil {
 		return &logger{
 			l: zap.L(),
