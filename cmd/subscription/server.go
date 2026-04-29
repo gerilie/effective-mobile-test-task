@@ -14,7 +14,7 @@ import (
 )
 
 type server struct {
-	cfg     *config.Config
+	cfg     config.Config
 	wg      *sync.WaitGroup
 	shSrvCh <-chan struct{}
 	errCh   chan<- error

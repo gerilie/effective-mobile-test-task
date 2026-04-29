@@ -1,32 +1,33 @@
 # App
 dev-up:
-	@env=dev $(MAKE) docker-build
+	docker compose \
+	-p subscription-dev \
+	--env-file .env.dev \
+	-f docker-compose.yml \
+	-f docker-compose.dev.yml \
+	up --build -d
+dev-down:
+	docker compose \
+	-p subscription-dev \
+	--env-file .env.dev \
+	-f docker-compose.yml \
+	-f docker-compose.dev.yml \
+	down
+
 prod-up:
-	@env=prod $(MAKE) docker-build
-host-up:
-	$(MAKE) host-db-up
-	$(MAKE) host-migrate-up
-	go run cmd/subscription/*.go --env=host
-
-# Docker
-docker-build:
-	docker compose --env-file config/$(env)-postgres.env up --build -d
-docker-up:
-	docker compose --env-file config/$(env)-postgres.env up -d 
-docker-down:
-	docker compose --env-file config/$(env)-postgres.env down
-
-# Host
-host-db-up:
-	docker compose --env-file config/host-postgres.env up -d postgres-host
-host-db-down:
-	docker compose --env-file config/host-postgres.env down
-host-migrate-gen:
-	goose create $(name) sql -env config/host-migrate.env
-host-migrate-up:
-	goose up sql -env config/host-migrate.env
-host-migrate-down:
-	goose down sql -env config/host-migrate.env
+	docker compose \
+	-p subscription-prod \
+	--env-file .env.prod \
+	-f docker-compose.yml \
+	-f docker-compose.prod.yml \
+	up --build -d
+prod-down:
+	docker compose \
+	-p subscription-prod \
+	--env-file .env.prod \
+	-f docker-compose.yml \
+	-f docker-compose.prod.yml \
+	down
 
 # Tools
 build:

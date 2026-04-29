@@ -1,11 +1,5 @@
 services:
   app:
-    build:
-      context: .
-      target: subscription
-    container_name: subscription_app
-    ports:
-      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -15,45 +9,28 @@ services:
     build:
       context: .
       target: migrate
-    container_name: "subscription_migrate"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       GOOSE_DRIVER: postgres
-      GOOSE_DBSTRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+      GOOSE_DBSTRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       GOOSE_MIGRATION_DIR: /app/migrations
 
   postgres:
     image: postgres:latest
-    container_name: subscription_postgres
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
       interval: 5s
       timeout: 3s
       retries: 5
       start_period: 5s
-    volumes:
-      - postgres_data:/var/lib/postgresql
-
-  postgres-host:
-    image: postgres:latest
-    container_name: subscription_postgres_host
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "127.0.0.1:${POSTGRES_PORT}:5432"
     volumes:
-      - postgres_data_host:/var/lib/postgresql
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   postgres_data:
-  postgres_data_host:

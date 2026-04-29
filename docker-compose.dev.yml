@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    env_file:
+      - .env.dev
+    ports:
+      - "3000:${APP_PORT}"
+    volumes:
+      - ./:/app
+
+  postgres:
+    ports:
+      - "5432:5432"

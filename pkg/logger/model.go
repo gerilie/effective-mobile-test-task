@@ -7,18 +7,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type key string
-
-const (
-	loggerKey    key = "logger"
-	RequestIDKey key = "request_id"
-)
-
-type Config struct {
-	Level string `mapstructure:"level"`
-	Env   string
-}
-
 type Logger interface {
 	Debug(ctx context.Context, msg string, fields ...zap.Field)
 	Info(ctx context.Context, msg string, fields ...zap.Field)
@@ -34,7 +22,7 @@ type logger struct {
 
 func NewBootstrap(environment string) Logger {
 	var cfg zap.Config
-	if environment == env.Dev || environment == env.Host {
+	if environment == env.Dev {
 		cfg = zap.NewDevelopmentConfig()
 	} else {
 		cfg = zap.NewProductionConfig()
@@ -52,9 +40,9 @@ func NewBootstrap(environment string) Logger {
 	}
 }
 
-func NewWithConfig(cfg Config) Logger {
+func NewWithConfig(cfg Config, environment string) Logger {
 	var config zap.Config
-	if cfg.Env == env.Dev || cfg.Env == env.Host {
+	if environment == env.Dev {
 		config = zap.NewDevelopmentConfig()
 	} else {
 		config = zap.NewProductionConfig()

@@ -7,6 +7,13 @@ import (
 	"go.uber.org/zap"
 )
 
+type key string
+
+const (
+	loggerKey    key = "logger"
+	RequestIDKey key = "request_id"
+)
+
 func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, loggerKey, logger)
 }
@@ -22,7 +29,7 @@ func FromContext(ctx context.Context) Logger {
 		}
 
 		l := NewBootstrap(env)
-		l.Warn(ctx, "logger not found in context, creating new one")
+		l.Warn(ctx, "logger not found in context, creating bootstrap one")
 
 		return l
 	}

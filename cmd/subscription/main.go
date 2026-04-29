@@ -8,11 +8,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/spf13/pflag"
+	"github.com/yushafro/effective-mobile-tz/internal/config"
 	"github.com/yushafro/effective-mobile-tz/pkg/deferfunc"
 	"github.com/yushafro/effective-mobile-tz/pkg/env"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
-	"go.uber.org/zap"
 )
 
 const (
@@ -27,27 +26,20 @@ const (
 //	@BasePath	/
 
 func main() {
-	environment := pflag.String("env", env.Dev, "Environment")
-
-	bootstrapLog := logger.NewBootstrap(*environment)
-	envCtx := context.WithValue(context.Background(), env.EnvKey, *environment)
-
-	ctx, stop := context.WithTimeout(
-		logger.WithLogger(envCtx, bootstrapLog),
-		shTO,
-	)
-	defer deferfunc.Close(ctx, bootstrapLog.Stop, "stop logger")
-	defer stop()
-
-	cfg, err := initConfig(ctx)
+	cfg, err := config.LoadConfig()
 	if err != nil {
-		bootstrapLog.Error(ctx, "init config", zap.Error(err))
 		panic(err)
 	}
 
-	mainLog := logger.NewWithConfig(cfg.Logger)
-	ctx = logger.WithLogger(ctx, mainLog)
-	defer deferfunc.Close(ctx, mainLog.Stop, "stop logger")
+	log := logger.NewWithConfig(cfg.Logger, cfg.Subscription.Env)
+	ctx, stop := context.WithTimeout(
+		logger.WithLogger(context.Background(), log),
+		shTO,
+	)
+	ctx = context.WithValue(ctx, env.EnvKey, cfg.Subscription.Env)
+
+	defer deferfunc.Close(ctx, log.Stop, "stop logger")
+	defer stop()
 
 	wg := &sync.WaitGroup{}
 	shSrvCh := make(chan struct{})
@@ -69,9 +61,9 @@ func main() {
 	shCh := make(chan os.Signal, 1)
 	signal.Notify(shCh, os.Interrupt, syscall.SIGINT)
 	<-shCh
-	mainLog.Info(ctx, "shutdown signal received")
+	log.Info(ctx, "shutdown signal received")
 
 	close(shSrvCh)
 	wg.Wait()
-	mainLog.Info(ctx, "servers stopped")
+	log.Info(ctx, "servers stopped")
 }

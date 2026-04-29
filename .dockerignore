@@ -1,0 +1,8 @@
+tmp
+.git
+.gitignore
+docker-compose*
+*.log
+.env
+.env.*
+config/*.env

@@ -9,14 +9,6 @@ import (
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
 
-type Config struct {
-	Host     string `mapstructure:"postgres_host"`
-	Port     string `mapstructure:"postgres_port"`
-	User     string `mapstructure:"postgres_user"`
-	Password string `mapstructure:"postgres_password"`
-	DB       string `mapstructure:"postgres_db"`
-}
-
 func New(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 	log := logger.FromContext(ctx)
 

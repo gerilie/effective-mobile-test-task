@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      target: subscription
+    restart: always
+    ports:
+      - "8080:${APP_PORT}"
+    env_file:
+      - .env.prod
+
+  migrate:
+    restart: "no"
+
+  postgres:
+    restart: always

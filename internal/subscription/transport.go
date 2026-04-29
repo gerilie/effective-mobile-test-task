@@ -4,7 +4,6 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -26,17 +25,6 @@ const (
 	swaggerPattern = "/swagger/"
 	pingPattern    = "GET /ping"
 )
-
-type Config struct {
-	Host                string
-	Port                string
-	ReadHTO             time.Duration `mapstructure:"read_header_timeout"`
-	ReadTO              time.Duration `mapstructure:"read_timeout"`
-	WriteTO             time.Duration `mapstructure:"write_timeout"`
-	IdleTO              time.Duration `mapstructure:"idle_timeout"`
-	RLRequestsPerSecond int           `mapstructure:"rate_limit_requests_per_second"`
-	RLBurst             int           `mapstructure:"rate_limit_burst"`
-}
 
 type server struct {
 	service  Service

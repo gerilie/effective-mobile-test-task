@@ -1,6 +1,4 @@
-# IDE
 .idea/
 .vscode/
-
-# binary
 /subscription
+tmp/
