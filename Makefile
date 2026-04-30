@@ -13,7 +13,6 @@ dev-down:
 	-f docker-compose.yml \
 	-f docker-compose.dev.yml \
 	down
-
 prod-up:
 	docker compose \
 	-p subscription-prod \
@@ -28,6 +27,10 @@ prod-down:
 	-f docker-compose.yml \
 	-f docker-compose.prod.yml \
 	down
+
+# Migrations
+migrate-gen:
+	goose create $(name) sql --dir ./migrations	
 
 # Tools
 build:
