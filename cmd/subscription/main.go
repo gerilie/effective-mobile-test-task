@@ -10,7 +10,6 @@ import (
 
 	"github.com/yushafro/effective-mobile-tz/internal/config"
 	"github.com/yushafro/effective-mobile-tz/pkg/deferfunc"
-	"github.com/yushafro/effective-mobile-tz/pkg/env"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
 
@@ -36,7 +35,6 @@ func main() {
 		logger.WithLogger(context.Background(), log),
 		shTO,
 	)
-	ctx = context.WithValue(ctx, env.EnvKey, cfg.Subscription.Env)
 
 	defer deferfunc.Close(ctx, log.Stop, "stop logger")
 	defer stop()
