@@ -4,6 +4,7 @@ import (
 	"context"
 )
 
+// Service defines business logic for subscription management.
 type Service interface {
 	create(ctx context.Context, dto SubReq) (SubResp, error)
 	get(ctx context.Context, id string) (SubResp, error)
@@ -16,6 +17,7 @@ type service struct {
 	repo Repository
 }
 
+// NewService creates a new Service instance.
 func NewService(repo Repository) Service {
 	return &service{
 		repo: repo,

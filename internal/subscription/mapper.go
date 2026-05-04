@@ -8,6 +8,7 @@ import (
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
 
+// subToModel converts SubReq DTO to domain model.
 func subToModel(ctx context.Context, dto SubReq) (sub, error) {
 	log := logger.FromContext(ctx)
 
@@ -37,6 +38,7 @@ func subToModel(ctx context.Context, dto SubReq) (sub, error) {
 	}, nil
 }
 
+// subToDTO converts domain model to SubResp DTO.
 func subToDTO(ctx context.Context, sub sub) (SubResp, error) {
 	log := logger.FromContext(ctx)
 
@@ -58,6 +60,7 @@ func subToDTO(ctx context.Context, sub sub) (SubResp, error) {
 	}, nil
 }
 
+// subListToModel converts SubListReq DTO to domain model.
 func subListToModel(ctx context.Context, dto SubListReq) subList {
 	log := logger.FromContext(ctx)
 
@@ -72,6 +75,7 @@ func subListToModel(ctx context.Context, dto SubListReq) subList {
 	}
 }
 
+// subListToDTO converts domain model to SubListResp DTO.
 func subListToDTO(ctx context.Context, subs []sub) (SubListResp, error) {
 	log := logger.FromContext(ctx)
 	subListResp := make(SubListResp, 0, len(subs))
@@ -90,6 +94,7 @@ func subListToDTO(ctx context.Context, subs []sub) (SubListResp, error) {
 	return subListResp, nil
 }
 
+// subSumToModel converts SubSumReq DTO to domain model.
 func subSumToModel(ctx context.Context, dto SubSumReq) (subSum, error) {
 	log := logger.FromContext(ctx)
 
@@ -114,6 +119,7 @@ func subSumToModel(ctx context.Context, dto SubSumReq) (subSum, error) {
 	}, nil
 }
 
+// subSumToDTO converts domain model to SubSumResp DTO.
 func subSumToDTO(ctx context.Context, sum subSum) SubSumResp {
 	log := logger.FromContext(ctx)
 
@@ -124,6 +130,7 @@ func subSumToDTO(ctx context.Context, sum subSum) SubSumResp {
 	}
 }
 
+// updateSubToModel converts UpdateSubReq DTO to domain model.
 func updateSubToModel(ctx context.Context, dto UpdateSubReq) (updateSub, error) {
 	log := logger.FromContext(ctx)
 

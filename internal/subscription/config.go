@@ -2,10 +2,11 @@ package subscription
 
 import (
 	"time"
-
-	"github.com/caarlos0/env/v11"
 )
 
+// Config represents subscription service configuration loaded from environment variables.
+//
+// It includes HTTP server settings, rate limiting configuration, and environment mode.
 type Config struct {
 	Env                 string        `env:"ENV"                            envDefault:"prod"`
 	Host                string        `env:"HOST,notEmpty"`
@@ -18,12 +19,5 @@ type Config struct {
 	RLBurst             int           `env:"RATE_LIMIT_BURST"               envDefault:"30"`
 }
 
-func LoadConfig() (Config, error) {
-	var cfg Config
-	err := env.Parse(&cfg)
-	if err != nil {
-		return Config{}, err
-	}
-
-	return cfg, nil
-}
+// LoadConfig parses environment variables into Config.
+func LoadConfig() (Config, error)

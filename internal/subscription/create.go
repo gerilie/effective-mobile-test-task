@@ -10,17 +10,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// @Summary	Create subscription
-// @Tags		subscription
-// @ID			create-subscription
-// @Accept		json
-// @Produce	json
-// @Param		sub	body		SubReq			true	"User ID must be uuid\nDate format: MM-YYYY"
-// @Success	201	{object}	SubResp			"Created subscription"
-// @Failure	400	{object}	validation.Resp	"Bad request"
-// @Failure	404	{string}	string			"Not found"
-// @Failure	500	{string}	string			"Internal server error"
-// @Router		/subscriptions [post].
+// create handles HTTP request for creating a subscription.
+//
+// It validates input JSON, calls service layer, and returns created subscription.
 func (s *server) create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)

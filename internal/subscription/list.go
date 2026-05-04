@@ -13,19 +13,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// @Summary		List subscriptions
-// @Description	Get paginated list of subscriptions with optional filters
-// @Tags			subscription
-// @ID				subscription-list
-// @Produce		json
-// @Param			page			query		int			true	"Page number (1-based)"
-// @Param			limit			query		int			true	"Items per page (max: 100)"
-// @Param			service_name	query		string		false	"filter by service name"
-// @Param			user_id			query		string		false	"filter by user ID"
-// @Success		200				{object}	SubListResp	"List subscriptions"
-// @Failure		400				{string}	string		"Bad request"
-// @Failure		500				{string}	string		"Internal server error"
-// @Router			/subscriptions [get].
+// list handles HTTP request for retrieving paginated subscriptions list.
+//
+// Supports filtering by service name and user ID.
 func (s *server) list(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)

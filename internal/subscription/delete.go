@@ -10,16 +10,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// @Summary		Delete subscription
-// @Description	Delete by subscription ID.
-// @Tags			subscription
-// @ID				delete-subscription
-// @Param			id	path	string	true	"Subscription ID"
-// @Success		204	"no content"
-// @Failure		400	{string}	string	"Bad request"
-// @Failure		404	{string}	string	"Not found"
-// @Failure		500	{string}	string	"Internal server error"
-// @Router			/subscriptions/{id} [delete].
+// delete handles HTTP request for deleting a subscription by ID.
+//
+// It returns 204 No Content on success.
 func (s *server) delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)

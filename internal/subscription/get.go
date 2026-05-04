@@ -12,17 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// @Summary		Get subscription
-// @Description	Get by subscription ID.
-// @Tags			subscription
-// @ID				get-subscription
-// @Produce		json
-// @Param			id	path		string	true	"Subscription ID"
-// @Success		200	{object}	SubResp	"Subscription"
-// @Failure		400	{string}	string	"Bad request"
-// @Failure		404	{string}	string	"Not found"
-// @Failure		500	{string}	string	"Internal server error"
-// @Router			/subscriptions/{id} [get].
+// get handles HTTP request for retrieving a subscription by ID.
+//
+// It returns subscription data in JSON format.
 func (s *server) get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)

@@ -12,19 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// @Summary		Update subscription
-// @Description	Update by subscription ID.
-// @Tags			subscription
-// @ID				update-subscription
-// @Accept			json
-// @Produce		json
-// @Param			id	path		string			true	"Subscription ID"
-// @Param			sub	body		UpdateSubReq	true	"Subscription"
-// @Success		200	{object}	SubResp			"User ID must be uuid"
-// @Failure		400	{object}	validation.Resp	"Bad request"
-// @Failure		404	{string}	string			"Not found"
-// @Failure		500	{string}	string			"Internal server error"
-// @Router			/subscriptions/{id} [patch].
+// update handles HTTP request for updating a subscription by ID.
+//
+// It supports partial updates and validates input before processing.
 func (s *server) update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)

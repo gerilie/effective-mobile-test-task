@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// Repository defines persistence operations for subscriptions.
 type Repository interface {
 	create(ctx context.Context, model sub) (sub, error)
 	get(ctx context.Context, id string) (sub, error)
@@ -21,6 +22,7 @@ type pgRepository struct {
 	builder squirrel.StatementBuilderType
 }
 
+// NewPGRepository creates PostgreSQL implementation of Repository.
 func NewPGRepository(db *pgxpool.Pool) *pgRepository {
 	builder := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
 

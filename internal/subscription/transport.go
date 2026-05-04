@@ -34,6 +34,7 @@ type server struct {
 	logger   logger.Logger
 }
 
+// NewServer creates a new HTTP server for handling subscription requests.
 func NewServer(service Service, cfg Config, log logger.Logger) *server {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	limiter := ratelimiter.NewIPRateLimiter(
@@ -60,20 +61,24 @@ func NewServer(service Service, cfg Config, log logger.Logger) *server {
 	return s
 }
 
+// Start starts the HTTP server.
 func (s *server) Start() error {
 	return s.server.ListenAndServe()
 }
 
+// Stop stops the HTTP server.
 func (s *server) Stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
+// buildHandler builds the HTTP handler for the server.
 func (s *server) buildHandler() http.Handler {
 	mux := s.buildRouter()
 
 	return s.buildMiddlewareChain(mux)
 }
 
+// buildRouter builds the HTTP router for the server.
 func (s *server) buildRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 
@@ -106,6 +111,7 @@ func (s *server) buildRouter() *http.ServeMux {
 	return mux
 }
 
+// buildMiddlewareChain builds the middleware chain for the server.
 func (s *server) buildMiddlewareChain(handler http.Handler) http.Handler {
 	handler = middleware.RateLimiter(handler, s.limiter)
 	handler = middleware.Logging(handler, s.logger)

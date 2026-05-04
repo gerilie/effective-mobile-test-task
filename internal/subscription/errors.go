@@ -14,6 +14,7 @@ import (
 
 var errDateOrder = errors.New("date order")
 
+// handleServiceErrors maps domain/service errors to HTTP responses.
 func handleServiceErrors(ctx context.Context, w http.ResponseWriter, err error) {
 	log := logger.FromContext(ctx)
 
@@ -36,6 +37,7 @@ func handleServiceErrors(ctx context.Context, w http.ResponseWriter, err error) 
 	httputil.HandleDefaultErrors(ctx, w, err)
 }
 
+// handleValidationErrors processes validation errors and writes HTTP response.
 func handleValidationErrors(ctx context.Context, w http.ResponseWriter, err error) {
 	if err, ok := err.(validator.ValidationErrors); ok {
 		validation.WriteErrors(ctx, w, err)

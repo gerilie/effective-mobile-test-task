@@ -2,6 +2,7 @@ package subscription
 
 import "time"
 
+// sub represents subscription domain model.
 type sub struct {
 	id          int
 	serviceName string
@@ -11,6 +12,7 @@ type sub struct {
 	endDate     *time.Time
 }
 
+// subSum represents subscription summa domain model.
 type subSum struct {
 	serviceName string
 	userID      string
@@ -19,6 +21,7 @@ type subSum struct {
 	totalPrice  int
 }
 
+// subList represents subscription list domain model.
 type subList struct {
 	serviceName string
 	userID      string
@@ -27,6 +30,7 @@ type subList struct {
 	offset      int
 }
 
+// updateSub represents subscription update domain model.
 type updateSub struct {
 	id          int
 	serviceName *string
