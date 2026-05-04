@@ -11,6 +11,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// HandleDefaultErrors maps common application errors to HTTP responses
+// and logs them using the logger stored in the context.
 func HandleDefaultErrors(ctx context.Context, w http.ResponseWriter, err error) {
 	var pgErr *pgconn.PgError
 	log := logger.FromContext(ctx)

@@ -11,6 +11,8 @@ import (
 	"github.com/yushafro/effective-mobile-tz/pkg/deferfunc"
 )
 
+// DecodeJSON reads and decodes JSON request body into dst.
+// It writes appropriate HTTP errors for malformed input.
 func DecodeJSON[T any](ctx context.Context, w http.ResponseWriter, r *http.Request, dst *T) error {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -39,6 +41,7 @@ func DecodeJSON[T any](ctx context.Context, w http.ResponseWriter, r *http.Reque
 	return nil
 }
 
+// WriteJSON encodes v to JSON and writes it to the response with given status code.
 func WriteJSON(ctx context.Context, w http.ResponseWriter, status int, v any) error {
 	data, err := json.Marshal(v)
 	if err != nil {

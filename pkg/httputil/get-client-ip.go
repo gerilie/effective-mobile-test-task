@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+// GetClientIP extracts the client IP address from the request.
+// It first checks the X-Real-IP header and falls back to RemoteAddr.
 func GetClientIP(r *http.Request) string {
 	xri := r.Header.Get("X-Real-IP")
 	if xri != "" {

@@ -1,3 +1,0 @@
-package httputil
-
-// type ErrResp
