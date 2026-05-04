@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -27,9 +26,9 @@ func Logging(next http.Handler, log logger.Logger) http.Handler {
 			id = uuid.NewString()
 		}
 
-		ctx = context.WithValue(ctx, logger.RequestIDKey, id)
-
+		ctx = logger.WithRequestID(ctx, id)
 		r = r.WithContext(ctx)
+
 		next.ServeHTTP(w, r)
 	})
 }

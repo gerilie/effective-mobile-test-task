@@ -7,15 +7,19 @@ import (
 	"go.uber.org/zap"
 )
 
-type key string
+type contextKey struct{}
 
-const (
-	loggerKey    key = "logger"
-	RequestIDKey key = "request_id"
+var (
+	loggerKey    = contextKey{}
+	requestIDKey = contextKey{}
 )
 
 func WithLogger(ctx context.Context, logger Logger) context.Context {
 	return context.WithValue(ctx, loggerKey, logger)
+}
+
+func WithRequestID(ctx context.Context, id string) context.Context {
+	return context.WithValue(ctx, requestIDKey, id)
 }
 
 func FromContext(ctx context.Context) Logger {
@@ -38,7 +42,7 @@ func FromContext(ctx context.Context) Logger {
 }
 
 func addID(ctx context.Context, fields []zap.Field) []zap.Field {
-	id, ok := ctx.Value(RequestIDKey).(string)
+	id, ok := ctx.Value(requestIDKey).(string)
 	if ok {
 		fields = append(fields, zap.String("request_id", id))
 	}
