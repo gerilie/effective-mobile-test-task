@@ -13,7 +13,11 @@ type Logger interface {
 	Info(ctx context.Context, msg string, fields ...zap.Field)
 	Warn(ctx context.Context, msg string, fields ...zap.Field)
 	Error(ctx context.Context, msg string, fields ...zap.Field)
+
 	With(fields ...zap.Field) Logger
+
+	Zap() *zap.Logger
+
 	Stop() error
 }
 
@@ -38,6 +42,10 @@ func NewWithConfig(cfg Config, environment string) (Logger, error) {
 	return &logger{
 		l: l,
 	}, nil
+}
+
+func (l *logger) Zap() *zap.Logger {
+	return l.l
 }
 
 func (l *logger) Stop() error {
