@@ -1,11 +1,13 @@
 # App
 FROM golang:alpine AS dev
 WORKDIR /app
+COPY . .
 
 RUN apk add --no-cache make git
+RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN go install github.com/air-verse/air@latest
 
-COPY . .
+RUN make swagger
 
 CMD ["air"]
 
