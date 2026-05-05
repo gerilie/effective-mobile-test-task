@@ -1,8 +1,12 @@
 package validation
 
-import "github.com/go-playground/validator/v10"
+import (
+	"fmt"
 
-// getErrorMessageForDateTag returns a user-friendly error message for date-related validation errors.
+	"github.com/go-playground/validator/v10"
+)
+
+// getErrorMessageForDatetimeTag returns a user-friendly error message for date-related validation errors.
 //
 // It inspects the validation tag from the provided validator.FieldError
 // and maps it to a corresponding message.
@@ -10,11 +14,11 @@ import "github.com/go-playground/validator/v10"
 // Supported tags:
 //   - "datetime": the field must follow the "MM-YYYY" format.
 //
-// If the validation tag is not recognized, getErrorMessageForDateTag returns an empty string.
-func getErrorMessageForDateTag(fe validator.FieldError) string {
+// If the validation tag is not recognized, getErrorMessageForDatetimeTag returns an empty string.
+func getErrorMessageForDatetimeTag(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "datetime":
-		return "The field must be in the format MM-YYYY"
+		return fmt.Sprintf("%s in the format 'MM-YYYY'", ValidationPrefix)
 	}
 
 	return ""

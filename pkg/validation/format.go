@@ -10,13 +10,13 @@ import (
 // for each error using getErrorMessageForTag, and maps it by the field name.
 //
 // The resulting map uses field names as keys and corresponding error messages as values.
-func formatErrorsByName(ve validator.ValidationErrors) Errors {
-	errors := make(Errors)
+func formatErrorsByName(ve validator.ValidationErrors) Resp {
+	errors := make(Resp)
 
-	for _, err := range ve {
-		message := getErrorMessageForTag(err)
+	for _, fe := range ve {
+		message := getErrorMessageForTag(fe)
 
-		name := err.Field()
+		name := fe.Field()
 		errors[name] = message
 	}
 

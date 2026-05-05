@@ -1,6 +1,10 @@
 package validation
 
-import "github.com/go-playground/validator/v10"
+import (
+	"fmt"
+
+	"github.com/go-playground/validator/v10"
+)
 
 // getErrorMessageForStringTag returns a user-friendly error message
 // for string-related validation errors.
@@ -16,9 +20,9 @@ import "github.com/go-playground/validator/v10"
 func getErrorMessageForStringTag(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "email":
-		return "The field must be a valid email address"
+		return fmt.Sprintf("%s a valid email address", ValidationPrefix)
 	case "uuid4":
-		return "The field must be a valid UUID (version 4)"
+		return fmt.Sprintf("%s a valid UUID (version 4)", ValidationPrefix)
 	}
 
 	return ""

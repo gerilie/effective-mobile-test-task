@@ -30,7 +30,7 @@ func getErrorMessageForTag(fe validator.FieldError) string {
 		return message
 	}
 
-	message = getErrorMessageForDateTag(fe)
+	message = getErrorMessageForDatetimeTag(fe)
 	if message != "" {
 		return message
 	}

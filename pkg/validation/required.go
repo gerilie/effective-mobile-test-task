@@ -20,10 +20,11 @@ import (
 func getErrorMessageForRequiredTag(fe validator.FieldError) string {
 	switch fe.Tag() {
 	case "required":
-		return "The field must be present"
+		return fmt.Sprintf("%s present", ValidationPrefix)
 	case "required_with":
 		return fmt.Sprintf(
-			"The field must be present when '%s' is present",
+			"%s present when '%s' is present",
+			ValidationPrefix,
 			fe.Param(),
 		)
 	}

@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -22,9 +23,7 @@ func handleServiceErrors(ctx context.Context, w http.ResponseWriter, err error) 
 		log.Error(ctx, "validate subscription", zap.Error(err))
 
 		resp := validation.Resp{
-			Fields: validation.Errors{
-				"start_date": "start date must be before end date",
-			},
+			"start_date": fmt.Sprintf("%s before end date", validation.ValidationPrefix),
 		}
 
 		if err := httputil.WriteJSON(ctx, w, http.StatusBadRequest, resp); err != nil {

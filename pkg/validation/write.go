@@ -28,11 +28,7 @@ import (
 // extracted from the context.
 func WriteErrors(ctx context.Context, w http.ResponseWriter, ve validator.ValidationErrors) {
 	log := logger.FromContext(ctx)
-	errors := formatErrorsByName(ve)
-
-	resp := Resp{
-		Fields: errors,
-	}
+	resp := formatErrorsByName(ve)
 
 	if err := httputil.WriteJSON(ctx, w, http.StatusBadRequest, resp); err != nil {
 		log.Error(ctx, "write response", zap.Error(err))
