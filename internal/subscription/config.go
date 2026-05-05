@@ -2,6 +2,8 @@ package subscription
 
 import (
 	"time"
+
+	"github.com/caarlos0/env/v11"
 )
 
 // Config represents subscription service configuration loaded from environment variables.
@@ -20,4 +22,12 @@ type Config struct {
 }
 
 // LoadConfig parses environment variables into Config.
-func LoadConfig() (Config, error)
+func LoadConfig() (Config, error) {
+	var cfg Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		return Config{}, err
+	}
+
+	return cfg, nil
+}
