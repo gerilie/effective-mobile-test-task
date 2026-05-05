@@ -11,8 +11,19 @@ import (
 	"go.uber.org/zap"
 )
 
-// sum handles HTTP request for calculating total subscription price
-// within a given date range with optional filters.
+// @Summary		Get subscription summa
+// @Description	Get total_price of all subscriptions.
+// @Tags			subscription
+// @ID				get-subscription-sum
+// @Produce		json
+// @Param			start_date		query		string			true	"Date format: MM-YYYY"
+// @Param			end_date		query		string			true	"Date format: MM-YYYY"
+// @Param			service_name	query		string			false	"filter by service name"
+// @Param			user_id			query		string			false	"filter by user ID"
+// @Success		200				{object}	SubSumResp		"Subscription sum"
+// @Failure		400				{object}	validation.Resp	"Bad request"
+// @Failure		500				{string}	string			"Internal server error"
+// @Router			/subscriptions/sum [get].
 func (s *server) sum(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)
