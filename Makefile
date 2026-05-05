@@ -28,10 +28,6 @@ prod-down:
 	-f docker-compose.prod.yml \
 	down
 
-# Migrations
-migrate-gen:
-	goose create $(name) sql --dir ./migrations	
-
 # Tools
 build:
 	go build -o subscription cmd/subscription/*.go
@@ -39,5 +35,10 @@ lint:
 	golangci-lint run -v
 test:
 	go test ./... -v -cover
+go-gen:
+	go generate ./...
+
+migrate-gen:
+	goose create $(name) sql --dir ./migrations	
 swagger:
 	swag init -g cmd/subscription/main.go
