@@ -7,6 +7,8 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate mockgen -source=model.go -destination=model_mock.go -package=logger
+
 // Logger defines a structured logging interface.
 type Logger interface {
 	Debug(msg string, fields ...zap.Field)
