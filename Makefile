@@ -29,7 +29,7 @@ lint:
 	golangci-lint run -v
 test:
 	go test ./... -v -cover -race
-go-gen:
+gen:
 	go generate ./...
 
 migrate-gen:
