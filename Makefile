@@ -28,7 +28,7 @@ build:
 lint:
 	golangci-lint run -v
 test:
-	go test ./... -v -cover
+	go test ./... -v -cover -race
 go-gen:
 	go generate ./...
 
