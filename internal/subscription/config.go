@@ -19,6 +19,8 @@ type Config struct {
 	IdleTO              time.Duration `env:"IDLE_TIMEOUT"                   envDefault:"120s"`
 	RLRequestsPerSecond int           `env:"RATE_LIMIT_REQUESTS_PER_SECOND" envDefault:"10"`
 	RLBurst             int           `env:"RATE_LIMIT_BURST"               envDefault:"30"`
+	RLCleanUpInterval   time.Duration `env:"RATE_LIMIT_CLEANUP_INTERVAL"    envDefault:"5m"`
+	RLCLeanUpMaxIdle    time.Duration `env:"RATE_LIMIT_CLEANUP_MAX_IDLE"    envDefault:"30m"`
 }
 
 // LoadConfig parses environment variables into Config.
