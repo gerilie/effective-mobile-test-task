@@ -17,7 +17,7 @@ import (
 // in the internal IP map.
 func (l *ipRateLimiter) GetLimiter(ip string) *rate.Limiter {
 	if ip == "" {
-		return rate.NewLimiter(l.r, l.b)
+		return rate.NewLimiter(l.R, l.B)
 	}
 
 	l.mu.Lock()
@@ -28,7 +28,7 @@ func (l *ipRateLimiter) GetLimiter(ip string) *rate.Limiter {
 
 	if c == nil {
 		c = &client{
-			limiter:  rate.NewLimiter(l.r, l.b),
+			limiter:  rate.NewLimiter(l.R, l.B),
 			lastSeen: now,
 		}
 

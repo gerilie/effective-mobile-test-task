@@ -14,16 +14,15 @@ import (
 type IPRateLimiter interface {
 	// GetLimiter returns a rate limiter associated with the given IP address.
 	//
-	// If a limiter for the provided IP does not exist, it is created.
+	// If a limiter for the provided IP does not exist, it is created
+	// and stored internally.
+	//
 	// If ip is empty, a new standalone limiter is returned without storing it.
 	GetLimiter(ip string) *rate.Limiter
 
 	// StartCleanUp starts a background cleanup routine that periodically removes
-	// inactive IP limiters from internal storage.
-	//
-	// interval defines how often cleanup runs.
-	// maxIdle defines how long an IP limiter may remain inactive before removal.
-	StartCleanUp(interval, maxIdle time.Duration)
+	// inactive IP limiters from internal storage using the configured cleanup settings.
+	StartCleanUp()
 }
 
 // client stores a rate limiter and metadata associated with a single IP address.
@@ -32,33 +31,54 @@ type client struct {
 	lastSeen time.Time
 }
 
+// Config defines the configuration for an IP rate limiter.
+type Config struct {
+	// R defines the number of allowed events per second.
+	R rate.Limit
+
+	// B defines the maximum burst size.
+	B int
+
+	// CleanUpInterval defines how often inactive IP limiters are checked and removed.
+	CleanUpInterval time.Duration
+
+	// CleanUpMaxIdle defines how long an IP limiter may remain inactive
+	// before it is removed from storage.
+	CleanUpMaxIdle time.Duration
+}
+
 // ipRateLimiter implements IPRateLimiter using an in-memory map of IP addresses.
 type ipRateLimiter struct {
-	mu *sync.Mutex
-	r  rate.Limit
-	b  int
+	Config
 
+	mu  *sync.Mutex
 	ips map[string]*client
 }
 
-// NewIPRateLimiter creates a new in-memory IP rate limiter.
+// NewIPRateLimiter creates a new in-memory IP rate limiter using the provided configuration.
 //
-// If r or b are less than or equal to zero, safe default values are used:
+// If cfg.r is less than or equal to zero, a default rate of 1 request per second is used.
 //
-//	r = 1 request per second
-//	b = 1 burst size
-func NewIPRateLimiter(r rate.Limit, b int) IPRateLimiter {
-	if r <= 0 {
-		r = rate.Limit(1)
+// If cfg.b is less than or equal to zero, a default burst size of 1 is used.
+func NewIPRateLimiter(cfg Config) IPRateLimiter {
+	if cfg.R <= 0 {
+		cfg.R = rate.Limit(1)
 	}
-	if b <= 0 {
-		b = 1
+
+	if cfg.B <= 0 {
+		cfg.B = 1
 	}
 
 	return &ipRateLimiter{
+		Config: Config{
+			R: cfg.R,
+			B: cfg.B,
+
+			CleanUpInterval: cfg.CleanUpInterval,
+			CleanUpMaxIdle:  cfg.CleanUpMaxIdle,
+		},
+
 		mu:  &sync.Mutex{},
-		r:   r,
-		b:   b,
 		ips: make(map[string]*client),
 	}
 }

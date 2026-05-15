@@ -43,8 +43,12 @@ type server struct {
 func NewServer(service Service, cfg Config, log logger.Logger) Server {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	limiter := ratelimiter.NewIPRateLimiter(
-		rate.Limit(cfg.RLRequestsPerSecond),
-		cfg.RLBurst,
+		ratelimiter.Config{
+			R:               rate.Limit(cfg.RLRequestsPerSecond),
+			B:               cfg.RLBurst,
+			CleanUpInterval: cfg.RLCleanUpInterval,
+			CleanUpMaxIdle:  cfg.RLCLeanUpMaxIdle,
+		},
 	)
 
 	s := &server{
