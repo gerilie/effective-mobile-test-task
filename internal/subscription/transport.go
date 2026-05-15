@@ -27,7 +27,7 @@ const (
 
 // Server defines a HTTP server for handling subscription requests.
 type Server interface {
-	Start() error
+	Start(ctx context.Context) error
 	Stop(ctx context.Context) error
 }
 
@@ -70,8 +70,10 @@ func NewServer(service Service, cfg Config, log logger.Logger) Server {
 	return s
 }
 
-// Start starts the HTTP server.
-func (s *server) Start() error {
+// Start starts the HTTP server and initializes background services.
+func (s *server) Start(ctx context.Context) error {
+	s.limiter.StartCleanUp(ctx)
+
 	return s.server.ListenAndServe()
 }
 

@@ -52,7 +52,7 @@ func initServer(ctx context.Context, s *server) {
 	}()
 
 	log.Info("server started")
-	err = server.Start()
+	err = server.Start(ctx)
 	if !errors.Is(err, http.ErrServerClosed) {
 		log.Error("Error starting server", zap.Error(err))
 		s.wg.Done()
