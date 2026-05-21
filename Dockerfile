@@ -29,7 +29,7 @@ RUN apk add --no-cache ca-certificates tzdata
 
 ENV TZ=UTC
 
-RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser 
+RUN addgroup -g 1000 appuser && adduser -D -u 1000 -G appuser appuser
 
 COPY --from=builder /app/subscription /app/subscription
 COPY --from=builder /app/docs /app/docs
