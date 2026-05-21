@@ -23,7 +23,7 @@ type server struct {
 func initServer(ctx context.Context, s *server) {
 	log := logger.FromContext(ctx)
 
-	db, err := postgres.New(ctx, s.cfg.Postgres)
+	db, err := postgres.New(ctx, s.cfg.Postgres, postgres.NewPoolConnector())
 	if err != nil {
 		s.errCh <- err
 
