@@ -21,7 +21,7 @@ import (
 func New(ctx context.Context, cfg Config, connector PoolConnector) (*pgxpool.Pool, error) {
 	log := logger.FromContext(ctx)
 
-	connString := buildConnString(cfg)
+	connString := BuildConnString(cfg)
 
 	pool, err := connector.Connect(ctx, connString)
 	if err != nil {
