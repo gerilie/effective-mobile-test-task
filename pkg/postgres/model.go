@@ -30,6 +30,8 @@ func New(ctx context.Context, cfg Config, connector PoolConnector) (*pgxpool.Poo
 
 	err = connector.Ping(ctx, pool)
 	if err != nil {
+		pool.Close()
+
 		return nil, fmt.Errorf("connection failed: %w", err)
 	}
 
