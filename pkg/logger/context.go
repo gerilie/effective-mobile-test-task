@@ -2,6 +2,8 @@ package logger
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"go.uber.org/zap"
 )
@@ -36,7 +38,9 @@ func WithRequestID(ctx context.Context, id string) context.Context {
 func FromContext(ctx context.Context) Logger {
 	l, ok := ctx.Value(loggerKey).(Logger)
 	if !ok {
-		return nil
+		fmt.Fprintln(os.Stderr, "WARNING: logger not found in context, using loop")
+
+		return &noopLogger{}
 	}
 
 	return l
