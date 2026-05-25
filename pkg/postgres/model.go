@@ -2,11 +2,16 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
 )
+
+// ErrConnectionFailed is returned by New when the connection to PostgreSQL
+// cannot be established or when the initial ping to verify connectivity fails.
+var ErrConnectionFailed = errors.New("connection failed")
 
 // New creates and returns a new PostgreSQL connection pool.
 //
@@ -25,14 +30,14 @@ func New(ctx context.Context, cfg Config, connector PoolConnector) (*pgxpool.Poo
 
 	pool, err := connector.Connect(ctx, connString)
 	if err != nil {
-		return nil, fmt.Errorf("connection failed: %w", err)
+		return nil, fmt.Errorf("%w: %w", ErrConnectionFailed, err)
 	}
 
 	err = connector.Ping(ctx, pool)
 	if err != nil {
 		pool.Close()
 
-		return nil, fmt.Errorf("connection failed: %w", err)
+		return nil, fmt.Errorf("%w: ping failed: %w", ErrConnectionFailed, err)
 	}
 
 	log.Info("connected to database")
