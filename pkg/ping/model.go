@@ -1,8 +1,8 @@
 package ping
 
-// pingResp represents the ping response.
+// resp represents the ping response.
 //
 // It has a single field, Timestamp, which is a string representing the timestamp.
-type pingResp struct {
+type resp struct {
 	Timestamp string `json:"timestamp"`
 }

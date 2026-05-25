@@ -22,7 +22,7 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)
 
-	resp := pingResp{
+	resp := resp{
 		Timestamp: time.Now().String(),
 	}
 
