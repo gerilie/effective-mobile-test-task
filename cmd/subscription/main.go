@@ -12,6 +12,8 @@ import (
 	"github.com/yushafro/effective-mobile-tz/internal/config"
 	"github.com/yushafro/effective-mobile-tz/pkg/deferfunc"
 	"github.com/yushafro/effective-mobile-tz/pkg/logger"
+
+	_ "github.com/yushafro/effective-mobile-tz/docs"
 )
 
 const (
