@@ -15,15 +15,15 @@ import (
 //	@Tags		health
 //	@ID			ping
 //	@Produce	json
-//	@Success	200	{object}	pingResp	"Ping success"
-//	@Failure	500	{string}	string		"Internal server error"
+//	@Success	200	{object}	Resp	"Ping success"
+//	@Failure	500	{string}	string	"Internal server error"
 //	@Router		/ping [get].
 func Ping(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	log := logger.FromContext(ctx)
 
 	resp := Resp{
-		Timestamp: time.Now().String(),
+		Timestamp: time.Now(),
 	}
 
 	if err := httputil.WriteJSON(w, http.StatusOK, resp); err != nil {

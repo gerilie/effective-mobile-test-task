@@ -1,8 +1,12 @@
 package ping
 
+import "time"
+
 // Resp represents the ping response.
 //
-// It has a single field, Timestamp, which is a string representing the timestamp.
+// It contains the server's current timestamp, indicating when the response
+// was generated.
 type Resp struct {
-	Timestamp string `json:"timestamp"`
+	// Timestamp is the exact time when the ping response was created.
+	Timestamp time.Time `json:"timestamp"`
 }
