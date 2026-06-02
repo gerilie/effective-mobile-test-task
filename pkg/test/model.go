@@ -20,3 +20,18 @@ type NoExpected[A any] struct {
 	Args  A
 	Error error
 }
+
+// Request represents an HTTP request with a method and path.
+type Request struct {
+	Method string
+	Path   string
+}
+
+// Response represents a generic HTTP response with a status code, body, and content type.
+//
+// B is the type of the response body.
+type Response[B any] struct {
+	Code        int
+	Body        B
+	ContentType string
+}
