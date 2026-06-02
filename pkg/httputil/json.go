@@ -33,7 +33,7 @@ func DecodeJSON[T any](ctx context.Context, w http.ResponseWriter, r *http.Reque
 			return fmt.Errorf("decode request body: %w", err)
 		}
 
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerErrorMsg, http.StatusInternalServerError)
 
 		return fmt.Errorf("decode request body: %w", err)
 	}
@@ -45,7 +45,7 @@ func DecodeJSON[T any](ctx context.Context, w http.ResponseWriter, r *http.Reque
 func WriteJSON(w http.ResponseWriter, status int, v any) error {
 	data, err := json.Marshal(v)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerErrorMsg, http.StatusInternalServerError)
 
 		return fmt.Errorf("encode request body: %w", err)
 	}
@@ -55,7 +55,7 @@ func WriteJSON(w http.ResponseWriter, status int, v any) error {
 
 	_, err = w.Write(data)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerErrorMsg, http.StatusInternalServerError)
 
 		return fmt.Errorf("write response body: %w", err)
 	}

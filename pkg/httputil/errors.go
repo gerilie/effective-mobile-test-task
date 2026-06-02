@@ -11,6 +11,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// InternalServerErrorMsg is the default error message for internal server errors.
+const InternalServerErrorMsg = "internal server error"
+
 // HandleDefaultErrors maps common application errors to HTTP responses
 // and logs them using the logger stored in the context.
 func HandleDefaultErrors(ctx context.Context, w http.ResponseWriter, err error) {
@@ -32,10 +35,10 @@ func HandleDefaultErrors(ctx context.Context, w http.ResponseWriter, err error) 
 			zap.String("detail", pgErr.Detail),
 			zap.String("table", pgErr.TableName),
 			zap.Error(err))
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerErrorMsg, http.StatusInternalServerError)
 
 	default:
 		log.Error("unexpected error", zap.Error(err))
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		http.Error(w, InternalServerErrorMsg, http.StatusInternalServerError)
 	}
 }
