@@ -8,6 +8,8 @@ import (
 	"golang.org/x/time/rate"
 )
 
+//go:generate mockgen -source=model.go -destination=model_mock.go -package=ratelimiter
+
 // IPRateLimiter provides per-IP rate limiting functionality.
 //
 // Implementations are responsible for storing and managing
