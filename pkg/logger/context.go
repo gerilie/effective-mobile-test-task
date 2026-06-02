@@ -67,7 +67,7 @@ func RequestIDFromContext(ctx context.Context) string {
 func FromContext(ctx context.Context) Logger {
 	l, ok := ctx.Value(loggerKey).(Logger)
 	if !ok {
-		fmt.Fprintln(os.Stderr, "WARNING: logger not found in context, using loop")
+		fmt.Fprintln(os.Stderr, "WARNING: logger not found in context, using noop logger")
 
 		return &noopLogger{}
 	}
