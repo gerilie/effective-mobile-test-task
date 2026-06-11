@@ -27,10 +27,15 @@ build:
 	go build -o subscription cmd/subscription/*.go
 lint:
 	golangci-lint run -v
-test:
-	go test ./... -v -cover -race
 gen:
 	go generate ./...
+
+test:
+	go test ./... -v -cover -race -tags=integration
+test-unit:
+	go test ./... -v -cover -race -short
+test-integration:
+	go test ./... -v -race -tags=integration
 
 migrate-gen:
 	goose create $(name) sql --dir ./migrations

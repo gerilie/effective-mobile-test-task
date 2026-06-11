@@ -31,6 +31,7 @@ hooks = [
   { id = "go-vulncheck-mod" },
   {
     id = "go-test-mod",
+    args = ["-short"],
     stages = [
       "pre-push",
     ]
