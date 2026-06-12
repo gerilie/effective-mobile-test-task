@@ -8,12 +8,11 @@ import (
 	"go.uber.org/zap"
 )
 
-type contextKey struct{}
+type contextKey string
 
-//nolint:gochecknoglobals
-var (
-	loggerKey    = contextKey{}
-	requestIDKey = contextKey{}
+const (
+	loggerKey    contextKey = "logger"
+	requestIDKey contextKey = "request_id"
 )
 
 // WithLogger returns a new context containing the provided Logger.
