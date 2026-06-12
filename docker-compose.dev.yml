@@ -9,7 +9,6 @@ services:
       - "3000:${APP_PORT}"
     volumes:
       - ./:/app
-
   postgres:
     ports:
       - "5432:5432"
