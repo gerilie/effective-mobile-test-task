@@ -68,7 +68,7 @@ func runMigrations(ctx context.Context, dsn string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open db for migrations: %w", err)
 	}
-	deferfunc.Close(ctx, db.Close, "close db for migrations")
+	defer deferfunc.Close(ctx, db.Close, "close db for migrations")
 
 	err = goose.SetDialect("postgres")
 	if err != nil {
